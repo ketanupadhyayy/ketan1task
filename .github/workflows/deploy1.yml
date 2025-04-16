@@ -1,0 +1,25 @@
+name: Deploy Node.js App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup SSH
+        run: |
+          echo "${{ secrets.VM_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+
+      - name: Deploy to Azure VM
+        run: |
+          ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "mkdir -p /home/ubuntu/node_app"
+          scp -i key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/ubuntu/node_app
+
