@@ -11,15 +11,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup SSH
         run: |
-          echo "${{ secrets.VM_SSH_KEY }}" > key.pem
+          echo "${{ secrets.PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
 
-      - name: Deploy to Azure VM
+      - name: Deploy to VM
         run: |
-          ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "mkdir -p /home/ubuntu/node_app"
-          scp -i key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/ubuntu/node_app
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@20.193.139.58 "mkdir -p /home/ubuntu/node_app"
+          scp -i key.pem -o StrictHostKeyChecking=no -r * ubuntu@20.193.139.58:/home/ubuntu/node_app
 
