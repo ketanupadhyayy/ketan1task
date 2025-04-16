@@ -1,4 +1,4 @@
-name: Node.js CI/CD to Azure VM
+name: Deploy Node App to Azure VM
 
 on:
   push:
@@ -10,28 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Setup SSH
+      - name: Set up SSH Key
         run: |
           echo "${{ secrets.VM_SSH_KEY }}" > key.pem
           chmod 600 key.pem
 
-      - name: Deploy to Azure VM
+      - name: Create Directory on VM
         run: |
           ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "mkdir -p /home/${{ secrets.VM_USER }}/node_app"
-          scp -i key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/${{ secrets.VM_USER }}/node_app
 
-      - name: Restart Node App (optional)
+      - name: Deploy to Azure VM
         run: |
-          ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "pm2 restart all || pm2 start /home/${{ secrets.VM_USER }}/node_app/app.js --name node_app"
+          scp -i key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/${{ secrets.VM_USER }}/node_app
 
